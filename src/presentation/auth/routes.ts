@@ -1,0 +1,22 @@
+import { BcryptAdapter } from "@/config/bcrypt";
+import { AuthDatasourceImpl } from "@infrastructure/datasources/auth.datasource.impl";
+import { AuthRepositoryImpl } from "@infrastructure/repositories/auth.repository.impl";
+import { Router } from "express";
+import { AuthController } from "./controller";
+
+export class AuthRoutes {
+  static get routes(): Router {
+    const router = Router();
+    const authDatasource = new AuthDatasourceImpl(
+      BcryptAdapter.hash,
+      BcryptAdapter.compare
+    );
+    const authRepository = new AuthRepositoryImpl(authDatasource);
+    const controller = new AuthController(authRepository);
+
+    router.post("/signup", controller.register);
+    router.post("/signin", controller.login);
+
+    return router;
+  }
+}
