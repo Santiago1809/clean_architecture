@@ -1,4 +1,5 @@
 import { JwtAdapter } from "@/config/jwt";
+import { UserModel } from "@/data/models/user.model";
 import { RegisterUserDTO } from "@/domain/dtos/auth/register-user.dto";
 import { CustomError } from "@/domain/errors/custom.error";
 import type { AuthRepository } from "@/domain/repositories/auth.repository";
@@ -33,5 +34,11 @@ export class AuthController {
 
   login = (req: Request, res: Response) => {
     res.json("Login user controller");
+  };
+
+  getUsers = (req: Request, res: Response) => {
+    UserModel.find()
+      .then((users) => res.json(users))
+      .catch(() => res.status(500).json({ error: "Internal server error" }));
   };
 }
