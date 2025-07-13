@@ -1,4 +1,4 @@
-import type { Router } from "express";
+import type { Request, Router } from "express";
 
 export interface ServerOptions {
   port?: number;
@@ -15,3 +15,7 @@ export type CompareFunction = (
   password: string,
   hash: string
 ) => Promise<boolean>;
+
+export interface CustomRequest extends Request {
+  token?: {}
+}

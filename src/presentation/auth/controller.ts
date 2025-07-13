@@ -3,6 +3,7 @@ import { UserModel } from "@/data/models/user.model";
 import { RegisterUserDTO } from "@/domain/dtos/auth/register-user.dto";
 import { CustomError } from "@/domain/errors/custom.error";
 import type { AuthRepository } from "@/domain/repositories/auth.repository";
+import type { CustomRequest } from "@/types";
 import type { Request, Response } from "express";
 
 export class AuthController {
@@ -26,7 +27,7 @@ export class AuthController {
       .then(async (user) => {
         res.json({
           user,
-          token: await JwtAdapter.generateToken({ email: user.email }),
+          token: await JwtAdapter.generateToken({ id: user.id }),
         });
       })
       .catch((error) => this.handleError(error, res));
@@ -36,9 +37,9 @@ export class AuthController {
     res.json("Login user controller");
   };
 
-  getUsers = (req: Request, res: Response) => {
+  getUsers = (req: CustomRequest, res: Response) => {
     UserModel.find()
-      .then((users) => res.json(users))
+      .then((users) => res.json({ token: req.token }))
       .catch(() => res.status(500).json({ error: "Internal server error" }));
   };
 }
