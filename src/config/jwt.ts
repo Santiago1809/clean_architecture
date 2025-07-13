@@ -1,4 +1,5 @@
 import jwt from "jsonwebtoken";
+import { JWT_SECRET } from "./envs";
 
 export class JwtAdapter {
   static async generateToken(
@@ -8,7 +9,7 @@ export class JwtAdapter {
     return new Promise((resolve) => {
       jwt.sign(
         payload,
-        "SEED",
+        JWT_SECRET!,
         {
           expiresIn: "2h",
           algorithm: "HS256",
