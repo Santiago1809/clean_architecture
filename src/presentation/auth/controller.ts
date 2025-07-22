@@ -1,13 +1,18 @@
-import { JwtAdapter } from "@/config/jwt";
-import { UserModel } from "@/data/models/user.model";
 import { RegisterUserDTO } from "@/domain/dtos/auth/register-user.dto";
+import { LoginUserDTO } from "@/domain/dtos/auth/login-user.dto";
 import { CustomError } from "@/domain/errors/custom.error";
-import type { AuthRepository } from "@/domain/repositories/auth.repository";
+import type { RegisterUser } from "@/domain/use-cases/auth/register-user.use-case";
+import type { LoginUser } from "@/domain/use-cases/auth/login-user.use-case";
+import type { GetUserProfile } from "@/domain/use-cases/auth/get-user-profile.use-case";
 import type { CustomRequest } from "@/types";
 import type { Request, Response } from "express";
 
 export class AuthController {
-  constructor(private readonly authRepository: AuthRepository) {}
+  constructor(
+    private readonly registerUserUseCase: RegisterUser,
+    private readonly loginUserUseCase: LoginUser,
+    private readonly getUserProfileUseCase: GetUserProfile
+  ) {}
 
   private handleError(error: unknown, res: Response) {
     if (error instanceof CustomError) {
@@ -22,24 +27,45 @@ export class AuthController {
     if (error) {
       return res.status(400).json({ error });
     }
-    this.authRepository
-      .register(registerUserDTO!)
-      .then(async (user) => {
-        res.json({
-          user,
-          token: await JwtAdapter.generateToken({ id: user.id }),
-        });
+    this.registerUserUseCase
+      .execute(registerUserDTO!)
+      .then((result) => {
+        res.json(result);
       })
       .catch((error) => this.handleError(error, res));
   };
 
   login = (req: Request, res: Response) => {
-    res.json("Login user controller");
+    const [error, loginUserDTO] = LoginUserDTO.create(req.body);
+    if (error) {
+      return res.status(400).json({ error });
+    }
+    this.loginUserUseCase
+      .execute(loginUserDTO!)
+      .then((result) => {
+        res.json(result);
+      })
+      .catch((error) => this.handleError(error, res));
+  };
+
+  getUserProfile = (req: CustomRequest, res: Response) => {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    this.getUserProfileUseCase
+      .execute({ userId })
+      .then((result) => {
+        res.json(result);
+      })
+      .catch((error) => this.handleError(error, res));
   };
 
   getUsers = (req: CustomRequest, res: Response) => {
-    UserModel.find()
-      .then((users) => res.json({ token: req.token }))
-      .catch(() => res.status(500).json({ error: "Internal server error" }));
+    res.json({
+      message: "Users endpoint accessed successfully",
+      token: req.token,
+    });
   };
 }

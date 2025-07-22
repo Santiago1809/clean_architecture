@@ -17,5 +17,8 @@ export type CompareFunction = (
 ) => Promise<boolean>;
 
 export interface CustomRequest extends Request {
-  token?: {}
+  token?: {};
+  user?: {
+    id: string;
+  };
 }

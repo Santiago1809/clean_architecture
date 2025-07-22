@@ -23,6 +23,11 @@ export class AuthMiddleware {
         return res.status(401).json({ error: "Invalid token" });
       }
       req.token = payload;
+
+      // Extraer el ID del usuario del payload
+      if (typeof payload === "object" && payload !== null && "id" in payload) {
+        req.user = { id: (payload as any).id };
+      }
     } catch (error) {
       console.log(error);
       if (error instanceof CustomError) {
