@@ -1,4 +1,5 @@
 import { JwtAdapter } from "@/config/jwt";
+import { CustomError } from "@/domain/errors/custom.error";
 import type { CustomRequest } from "@/types";
 import type { NextFunction, Response } from "express";
 
@@ -24,6 +25,9 @@ export class AuthMiddleware {
       req.token = payload;
     } catch (error) {
       console.log(error);
+      if (error instanceof CustomError) {
+        return res.status(401).json({ error: error.message });
+      }
       res.status(500).json({ error: "Internal server error" });
     }
 
